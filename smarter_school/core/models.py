@@ -15,23 +15,18 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='parent')
     phone = models.CharField(max_length=20, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # time added
-    updated_at = models.DateTimeField(auto_now=True)      # time updated
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    # Fix reverse accessor clashes
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='core_users',  # unique reverse name
+        related_name='core_users',
         blank=True,
-        help_text='The groups this user belongs to.',
-        verbose_name='groups',
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='core_users_permissions',  # unique reverse name
+        related_name='core_users_permissions',
         blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions',
     )
 
     def __str__(self):
@@ -52,7 +47,12 @@ class Subject(models.Model):
 # TEACHER MODEL
 # -----------------------------
 class Teacher(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile', limit_choices_to={'role': 'teacher'})
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='teacher_profile',
+        limit_choices_to={'role': 'teacher'}
+    )
     assigned_subject = models.ForeignKey(
         Subject,
         on_delete=models.SET_NULL,
@@ -94,6 +94,26 @@ class Student(models.Model):
 
     date_of_birth = models.DateField(null=True, blank=True)
     date_joined = models.DateField(default=timezone.now)
+    is_graduated = models.BooleanField(default=False)
+
+    def promote(self):
+        promotion_map = {
+            'JSS1': 'JSS2',
+            'JSS2': 'JSS3',
+            'JSS3': 'SS1',
+            'SS1': 'SS2',
+            'SS2': 'SS3',
+            'SS3': None,
+        }
+
+        next_class = promotion_map.get(self.current_class)
+
+        if next_class:
+            self.current_class = next_class
+        else:
+            self.is_graduated = True
+
+        self.save()
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.current_class})"
@@ -114,24 +134,24 @@ class Result(models.Model):
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='results')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    session = models.CharField(max_length=20)   # e.g. "2024/2025"
+    session = models.CharField(max_length=20)
     term = models.CharField(max_length=20, default="1st Term")
 
-    ca1 = models.IntegerField(default=0)
-    ca2 = models.IntegerField(default=0)
-    exam = models.IntegerField(default=0)
+    ca1 = models.PositiveIntegerField(default=0)
+    ca2 = models.PositiveIntegerField(default=0)
+    exam = models.PositiveIntegerField(default=0)
 
-    total = models.IntegerField(default=0)
+    total = models.PositiveIntegerField(blank=True, null=True)
     grade = models.CharField(max_length=2, blank=True)
 
     class Meta:
         unique_together = ('student', 'subject', 'session', 'term')
 
     def calculate_grade(self):
-        for minimum, grade in Result.GRADE_BOUNDARIES:
+        for minimum, grade in self.GRADE_BOUNDARIES:
             if self.total >= minimum:
                 return grade
-        return "F"
+        return 'F'
 
     def save(self, *args, **kwargs):
         self.total = self.ca1 + self.ca2 + self.exam
@@ -139,7 +159,7 @@ class Result(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.student} - {self.subject} ({self.session})"
+        return f"{self.student} - {self.subject} ({self.session} {self.term})"
 
 
 # -----------------------------
@@ -151,7 +171,11 @@ class Attendance(models.Model):
         ('absent', 'Absent'),
     )
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendance_records')
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='attendance_records'
+    )
     date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
 

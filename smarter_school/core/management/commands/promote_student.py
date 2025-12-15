@@ -31,3 +31,19 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'Promotion completed: {promoted_count} students promoted, {graduated_count} graduated.'
         ))
+
+
+class Command(BaseCommand):
+    help = 'Promote all eligible students to the next class'
+
+    def handle(self, *args, **options):
+        students = Student.objects.filter(is_graduated=False)
+        count = 0
+
+        for student in students:
+            student.promote()
+            count += 1
+
+        self.stdout.write(
+            self.style.SUCCESS(f'{count} students processed successfully.')
+        )
