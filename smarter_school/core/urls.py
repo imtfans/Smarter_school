@@ -4,6 +4,7 @@ from .views import (
     UserViewSet, StudentViewSet, TeacherViewSet,
     SubjectViewSet, ResultViewSet, AttendanceViewSet
 )
+from .views import health_check
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -15,4 +16,6 @@ router.register(r'attendance', AttendanceViewSet, basename='attendance')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('healthz/', health_check, name='health-check'),
 ]
+
