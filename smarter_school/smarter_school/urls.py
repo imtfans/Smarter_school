@@ -4,8 +4,9 @@ from rest_framework.routers import DefaultRouter
 from core.views import (
     UserViewSet, StudentViewSet, TeacherViewSet,
     SubjectViewSet, ResultViewSet, AttendanceViewSet,
-    healthz
 )
+from core.views import healthz
+
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from core.views import home
 

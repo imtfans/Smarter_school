@@ -67,6 +67,13 @@ class AttendanceViewSet(viewsets.ModelViewSet):
 
 
 
+def home(request):
+    return JsonResponse({
+        "message": "Smarter School API is live",
+        "status": "running"
+    })
+
+
+
 def healthz(request):
     return JsonResponse({"status": "ok"})
-

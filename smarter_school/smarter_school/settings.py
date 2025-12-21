@@ -27,7 +27,9 @@ SECRET_KEY = config('SECRET_KEY', default='unsafe-dev-key')
 
 
 DEBUG = False
-ALLOWED_HOSTS = ["smarter-school.onrender.com"]
+
+
+ALLOWED_HOSTS = ["*"]
 
 # ---------------------------------------------------------
 # Installed Apps
@@ -101,10 +103,14 @@ AUTH_USER_MODEL = "core.User"
 # ---------------------------------------------------------
 # Database
 # ---------------------------------------------------------
+
+
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL')
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 # ---------------------------------------------------------

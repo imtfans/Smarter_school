@@ -14,8 +14,9 @@ router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'results', ResultViewSet, basename='result')
 router.register(r'attendance', AttendanceViewSet, basename='attendance')
 
+
+
 urlpatterns = [
     path('', include(router.urls)),
-    path('healthz/', health_check, name='health-check'),
+    path('healthz/', healthz, name='health-check'),
 ]
-
