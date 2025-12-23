@@ -77,3 +77,4 @@ def home(request):
 
 def healthz(request):
     return JsonResponse({"status": "ok"})
+
